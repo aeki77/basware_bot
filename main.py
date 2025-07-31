@@ -6,6 +6,7 @@ from core.browser_manager import BrowserManager
 from pages.login_page import LoginPage
 from pages.home_page import HomePage
 from pages.ordre_de_service_formulaire_page import OrdreDeServiceFormulairePage
+from pages.ordre_de_service_formulaire_demande_approbation_page import OrdreDeServiceFormulaireDemandeApprobationPage
 
 # Charger les variables du .env
 load_dotenv()
@@ -32,7 +33,7 @@ with BrowserManager() as page:
         fournisseur="ACTI NORD",
         code_categorie_achat="35",
         code_lot="35",
-        designation_des_travaux="VRD",
+        designation_des_travaux="Test ACTE3",
         montant_ht="1000",
         montant_puc="12.7",
         approbateur="SIEMONEIT",
@@ -40,7 +41,15 @@ with BrowserManager() as page:
         timeout=10000
     )
     OS_formulaire.modifier_la_demande_d_achat()
+    time.sleep(14)
+
+    OS_upload_DPGF_et_approbation = OrdreDeServiceFormulaireDemandeApprobationPage(page)
+    OS_upload_DPGF_et_approbation.obtenir_approbation()
+    OS_upload_DPGF_et_approbation.ajouter_fichier_joint(chemin_pdf=r"C:\Users\Acte3\Desktop\CdC_acoustiqu_studio_112–fev2021.pdf")
+
     time.sleep(127)
+
+# C:\Users\Acte3\Desktop\basware_bot\README.md
 
     # OS_formulaire._remplir_fournisseur(code="37840", fournisseur="ACTI NORD")
     # OS_formulaire._remplir_categorie_achat(code_categorie='35', timeout=10000)
