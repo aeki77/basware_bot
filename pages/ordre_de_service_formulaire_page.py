@@ -28,6 +28,7 @@ class OrdreDeServiceFormulairePage(BasePage):
         code_fournisseur: str,
         fournisseur: str,
         code_categorie_achat: str,
+        categorie_achat: str,
         code_lot: str,
         designation_des_travaux: str,
         montant_ht: str,
@@ -37,29 +38,21 @@ class OrdreDeServiceFormulairePage(BasePage):
         timeout=10000
     ):
         self._remplir_fournisseur(code=code_fournisseur, fournisseur=fournisseur, timeout=timeout)
-        self._remplir_categorie_achat(code_categorie=code_categorie_achat, timeout=timeout)
-        time.sleep(.5)
+        self._remplir_categorie_achat(code_categorie=code_categorie_achat, categorie=categorie_achat, timeout=timeout)
         self._remplir_text_designation_des_travaux(texte=designation_des_travaux, timeout=timeout)
-        time.sleep(.5)
         self._remplir_puc(montant_puc, timeout=timeout)
-        time.sleep(.5)
         self._remplir_operation(f"{code_lot}-{designation_des_travaux}-{nom_site}", timeout=timeout)
-        time.sleep(.5)
         self._remplir_montant_HT(montant_ht, timeout=timeout)
         time.sleep(2)
         self._remplir_approbateur(nom=approbateur, timeout=timeout)
-        time.sleep(.5)
         self._remplir_centre_de_couts(nom_site=nom_site, timeout=timeout)
-        time.sleep(.5)
         self._remplir_projet_ou_sous_site(timeout=timeout)
-        time.sleep(.5)
         self._remplir_type_depense(timeout=timeout)
-        time.sleep(.5)
 
     # ------------------------------------------------------------------ #
     #  Méthodes privées
     # ------------------------------------------------------------------ #
-    def _remplir_categorie_achat(self, code_categorie: str, timeout=10000):
+    def _remplir_categorie_achat(self, code_categorie: str, categorie: str, timeout=10000):
         try:
             print(f"🔎 Remplissage catégorie d'achat avec : {code_categorie}")
 
@@ -72,9 +65,12 @@ class OrdreDeServiceFormulairePage(BasePage):
             champ_recherche = self.page.get_by_role("searchbox")
             safe_fill(champ_recherche, code_categorie, timeout)
 
-            time.sleep(2)
+            # Étape 3 : Attente d’un span contenant le texte complet
+            # Exemple : "VOIRIE RESEAUX DIVERS"
+            option = self.page.locator("pal-tree-item").filter(has_text=categorie)
+            option.wait_for(state="visible", timeout=timeout)
 
-            # Étape 3 : Valide avec Entrée
+            # Étape 4 : Valide avec Entrée
             champ_recherche.press("Enter")
 
             print(f"✅ Catégorie d'achat sélectionnée : {code_categorie}")
@@ -138,8 +134,6 @@ class OrdreDeServiceFormulairePage(BasePage):
             champ_fournisseur = self.page.get_by_role("textbox", name="Fournisseur *")
             safe_fill(champ_fournisseur, code, timeout)
 
-            time.sleep(2)
-
             # Étape 3 : Cliquer sur le nom du fournisseur dans la liste déroulante
             # option = self.page.get_by_text(f"- {fournisseur}", exact=True)
             option = self.page.get_by_role("option", name=f"- {fournisseur}")
@@ -164,7 +158,9 @@ class OrdreDeServiceFormulairePage(BasePage):
             champ = self.page.get_by_role("textbox", name="Approbateur")
             safe_fill(champ, nom, timeout)
 
-            time.sleep(2)
+            # Étape 3 : Attente que l’option filtrée apparaisse (ex. : même nom ou partie du nom)
+            option_attendue = self.page.get_by_role("option", name=nom.upper())
+            option_attendue.wait_for(state="visible", timeout=timeout)
 
             # Étape 3 : Valide avec Entrée
             champ.press("Enter")
@@ -186,7 +182,9 @@ class OrdreDeServiceFormulairePage(BasePage):
             champ = self.page.get_by_role("textbox", name="Centre de coûts (ou Site) *")
             safe_fill(champ, nom_site, timeout)
 
-            time.sleep(2)
+            # Étape 3 : Attend qu’une option soit disponible avant validation
+            option = self.page.get_by_role("option", name=nom_site.upper())
+            option.wait_for(state="visible", timeout=timeout)
 
             # Étape 3 : Valide
             champ.press("Enter")
@@ -208,7 +206,9 @@ class OrdreDeServiceFormulairePage(BasePage):
             champ = self.page.get_by_role("textbox", name="Projet (ou Sous-site) *")
             safe_fill(champ, '0', timeout)
 
-            time.sleep(2)
+            # Étape 3 : Attendre que l'option souhaitée apparaisse
+            option = self.page.get_by_role("option", name="0 - OUVERTURE")
+            option.wait_for(state="visible", timeout=timeout)
 
             # Étape 3 : Valide avec Enter
             champ.press("Enter")
@@ -234,6 +234,3 @@ class OrdreDeServiceFormulairePage(BasePage):
             print("✅ Type de dépense sélectionné : 'CAPEX'")
         except Exception as e:
             print(f"❌ Erreur lors de la sélection du type de dépense : {e}")
-
-
-

@@ -21,33 +21,40 @@ with BrowserManager() as page:
     login.login(USERNAME, PASSWORD)
 
     home = HomePage(page)
-    home.clique_sur_menu_boutique()
+
+    home.clique_sur_menu_boutique(timeout=30000)
 
     # home.modifie_le_proprietaire_de_la_demande_d_achat("TRUONG Pierre")
     # home.clique_sur_menu_boutique()
-    home.clique_sur_bouton_ordre_de_service()
+    home.clique_sur_bouton_ordre_de_service(timeout=20000)
 
     OS_formulaire = OrdreDeServiceFormulairePage(page)
     OS_formulaire.remplir_champs(
         code_fournisseur="37840",
         fournisseur="ACTI NORD",
         code_categorie_achat="35",
+        categorie_achat="VOIRIE RESEAUX DIVERS",
         code_lot="35",
         designation_des_travaux="Test ACTE3",
         montant_ht="1000",
         montant_puc="12.7",
         approbateur="SIEMONEIT",
         nom_site="VOUZIERS",
-        timeout=10000
+        timeout=20000
     )
     OS_formulaire.modifier_la_demande_d_achat()
     time.sleep(14)
 
+    # # Attendre un élément unique de la page suivante avant d'instancier l’objet
+    # champ_montant = page.get_by_role("textbox", name="Montant HT *")
+    # champ_montant.wait_for(state="visible", timeout=10000)
+
     OS_upload_DPGF_et_approbation = OrdreDeServiceFormulaireDemandeApprobationPage(page)
     OS_upload_DPGF_et_approbation.obtenir_approbation()
-    OS_upload_DPGF_et_approbation.ajouter_fichier_joint(chemin_pdf=r"C:\Users\Acte3\Desktop\CdC_acoustiqu_studio_112–fev2021.pdf")
+    # OS_upload_DPGF_et_approbation.ajouter_fichier_joint(chemin_pdf=r"C:\Users\Acte3\Desktop\CdC_acoustiqu_studio_112–fev2021.pdf")
+    OS_upload_DPGF_et_approbation.ajouter_fichier_joint(chemin_pdf="/Users/nicolascazanave/Desktop/basware_bot/invoice copie.pdf")
 
-    time.sleep(127)
+    time.sleep(17)
 
 # C:\Users\Acte3\Desktop\basware_bot\README.md
 

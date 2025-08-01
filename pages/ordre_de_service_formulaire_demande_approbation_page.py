@@ -1,4 +1,4 @@
-import time  # en haut du fichier
+# import time  # en haut du fichier
 from datetime import datetime
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
@@ -27,13 +27,7 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
     def _remplir_date_livraison(self, timeout=10000):
         try:
             print("📅 Remplissage de la date de livraison souhaitée...")
-
-            # print("\t🖊️ Clic sur le bouton 'crayon' (édition)...")
-            # # Clic sur le bouton avec icône crayon (⚠️ fragile)
-            # bouton_crayon = self.page.get_by_role("button", name="", exact=True)
-            # safe_click(bouton_crayon, timeout)
-            # print("\t✅ Clic sur le bouton 'crayon' effectué")
-            time.sleep(2)
+            # time.sleep(2)
 
             # 31 décembre de l’année en cours, au format mm/dd/yyyy
             fin_annee = datetime.now().replace(month=12, day=31).strftime("%d/%m/%Y")
@@ -43,14 +37,15 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
             safe_click(champ_date, timeout)
             champ_date.fill(fin_annee)
 
-            time.sleep(2)
-
             # Étape 3 : clic sur Enregistrer
             bouton_enregistrer = self.page.get_by_label("Réduire Données d'en-tête").get_by_role("button", name="Enregistrer")
             safe_click(bouton_enregistrer, timeout)
 
             print(f"✅ Date de livraison définie au {fin_annee}")
-            time.sleep(7)
+
+            print("⏳ Attente du bouton 'Modifier' (icône crayon)...")
+            bouton = self.page.locator('[data-t-id="purchase-details-header-panel-start-edit-button"]')
+            bouton.wait_for(state="visible", timeout=timeout)
 
         except Exception as e:
             print(f"❌ Erreur lors du remplissage de la date de livraison : {e}")
@@ -76,6 +71,9 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
             bouton_enregistrer = self.page.get_by_role("button", name="Enregistrer", exact=True)
             safe_click(bouton_enregistrer, timeout)
 
+            # ✅ Étape 5 : attendre que le bouton 'Modifier' réapparaisse après sauvegarde
+            self.page.get_by_role("button", name="Modifier", exact=True).wait_for(state="visible", timeout=timeout)
+
             print("✅ Adresse personnalisée sélectionnée et enregistrée")
 
         except PlaywrightTimeoutError:
@@ -83,14 +81,14 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
         except Exception as e:
             print(f"❌ Erreur inattendue : {e}")
 
-    def _ouvrir_modale_ajout_pj(self):
+    def _ouvrir_modale_ajout_pj(self, timeout=10000):
         bouton = self.page.locator('button[title="Ajouter un fichier joint"]')
         safe_click(bouton)
 
         # Attente explicite des éléments dans la modale
-        self.page.get_by_text("Ajouter un fichier joint").wait_for(state="visible", timeout=10000)
-        self.page.get_by_text("Sélectionner un fichier").wait_for(state="visible", timeout=10000)
-        self.page.get_by_role("checkbox", name="Fichier joint envoyé au").wait_for(state="visible", timeout=10000)
+        self.page.get_by_text("Ajouter un fichier joint").wait_for(state="visible", timeout=timeout)
+        self.page.get_by_text("Sélectionner un fichier").wait_for(state="visible", timeout=timeout)
+        self.page.get_by_role("checkbox", name="Fichier joint envoyé au").wait_for(state="visible", timeout=timeout)
         print("✅ Modale 'Ajouter un fichier joint' affichée")
 
     def _cocher_envoi_fichier_joint(self):
@@ -98,7 +96,7 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
         checkbox.check()
         print("☑️  Checkbox 'Fichier joint envoyé au' cochée")
 
-    def _uploader_fichier_joint(self, chemin_pdf):
+    def _uploader_fichier_joint(self, chemin_pdf, timeout=10000):
         nom_fichier = chemin_pdf.split("/")[-1]  # récupère juste "dave.jpg"
 
         # Sélectionner l'input file et y envoyer le fichier
@@ -106,15 +104,13 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
         input_file.set_input_files(chemin_pdf)
         print(f"📤 Upload lancé : {nom_fichier}")
 
-        time.sleep(7)
-        # Attendre que le nom de fichier apparaisse dans la modale
-        # self.page.get_by_role("dialog").get_by_text(nom_fichier).wait_for(state="visible", timeout=10000)
+        self.page.get_by_text(nom_fichier).wait_for(state="visible", timeout=timeout)
         print(f"✅ Fichier visible dans la modale : {nom_fichier}")
 
-    def _valider_ajout_fichier_joint(self):
+    def _valider_ajout_fichier_joint(self, timeout=10000):
         try:
             bouton_ajouter = self.page.get_by_role("button", name="Ajouter")
-            bouton_ajouter.wait_for(state="visible", timeout=5000)
+            bouton_ajouter.wait_for(state="visible", timeout=timeout)
             safe_click(bouton_ajouter)
             print("✅ Fichier joint validé")
         except TimeoutError:

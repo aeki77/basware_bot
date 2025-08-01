@@ -1,6 +1,8 @@
 from core.base_page import BasePage
 from core.helpers import safe_click, safe_fill
 
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
 
 class HomePage(BasePage):
     def clique_sur_menu_boutique(self, timeout=10000):
@@ -10,18 +12,18 @@ class HomePage(BasePage):
 
         # Étape 2 : Attente que le contenu de la boutique se charge
         try:
-            self.page.wait_for_selector("text='Construction - avec réception'", timeout=timeout)
-            self.page.wait_for_selector("text='Ordre de service'", timeout=timeout)
-            self.page.wait_for_selector("text='Construction - sans réception'", timeout=timeout)
+            self.page.get_by_text("Construction - avec réception").wait_for(state="visible", timeout=timeout)
+            self.page.get_by_text("Ordre de service").wait_for(state="visible", timeout=timeout)
+            self.page.get_by_text("Construction - sans réception").wait_for(state="visible", timeout=timeout)
             print("✅ Éléments de la boutique visibles")
-        except TimeoutError:
+        except PlaywrightTimeoutError:
             print("❌ Les éléments attendus n'ont pas été trouvés à temps")
             return
 
     def clique_sur_bouton_construction_sans_reception(self, timeout=10000):
         try:
             bouton = self.page.get_by_text("Construction - sans réception")
-            self.page.wait_for_selector("text='Construction - sans réception'", timeout=timeout)
+            bouton.wait_for(state="visible", timeout=timeout)
             safe_click(bouton)
             print("✅ Clic sur 'Construction - sans réception' réussi'")
         except TimeoutError:
