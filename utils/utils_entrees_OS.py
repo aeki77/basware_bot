@@ -102,7 +102,8 @@ def donne_code_categorie_d_achat_BASWARE(code_lot: str) -> tuple[str, str] | Non
         "38": ("38", "ARROSAGE"),
         "37": ("37", "ESPACES VERTS"),
         "36": ("36", "REVETEMENTS TERRASSE"),
-        "35": ("35", "VOIRIE RESEAUX DIVERS")
+        "35": ("35", "VOIRIE RESEAUX DIVERS"),
+        "65": ("65", "NETTOYAGE-PROTECTION-DIVERS")
     }
 
     return correspondances.get(code_lot)
