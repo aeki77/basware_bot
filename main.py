@@ -2,7 +2,7 @@ import os
 import time
 import pandas as pd
 
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+# from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from dotenv import load_dotenv
 from core.browser_manager import BrowserManager
@@ -30,7 +30,7 @@ URL = "https://frmcd.p2p.basware.com/"
 
 # print("Fichier Excel exporté avec succès.")
 
-df = pd.read_excel("recapitulatif_OS_VOUZIERS-restants.xlsx")
+df = pd.read_excel("data/recapitulatif_OS_VOUZIERS-restants.xlsx")
 OS_Vouziers_donnees = df.to_dict(orient="records")
 
 timeout = 5000
