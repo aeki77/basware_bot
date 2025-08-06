@@ -38,16 +38,25 @@ class OrdreDeServiceFormulairePage(BasePage):
         timeout=10000
     ):
         self._remplir_fournisseur(code=code_fournisseur, fournisseur=fournisseur, timeout=timeout)
+        time.sleep(2)
         self._remplir_categorie_achat(code_categorie=code_categorie_achat, categorie=categorie_achat, timeout=timeout)
+        time.sleep(2)
         self._remplir_text_designation_des_travaux(texte=designation_des_travaux, timeout=timeout)
+        time.sleep(2)
         self._remplir_puc(montant_puc, timeout=timeout)
-        self._remplir_operation(f"{code_lot}-{designation_des_travaux}-{nom_site}", timeout=timeout)
+        time.sleep(2)
+        self._remplir_operation(texte=designation_des_travaux, timeout=timeout)
+        time.sleep(2)
         self._remplir_montant_HT(montant_ht, timeout=timeout)
         time.sleep(2)
         self._remplir_approbateur(nom=approbateur, timeout=timeout)
+        time.sleep(2)
         self._remplir_centre_de_couts(nom_site=nom_site, timeout=timeout)
+        time.sleep(2)
         self._remplir_projet_ou_sous_site(timeout=timeout)
+        time.sleep(2)
         self._remplir_type_depense(timeout=timeout)
+        time.sleep(2)
 
     # ------------------------------------------------------------------ #
     #  Méthodes privées
@@ -193,7 +202,7 @@ class OrdreDeServiceFormulairePage(BasePage):
         except Exception as e:
             print(f"❌ Erreur lors du remplissage du centre de coûts : {e}")
 
-    def _remplir_projet_ou_sous_site(self, timeout=10000):
+    def _remplir_projet_ou_sous_site(self, timeout=20000):
         try:
             print("🔎 Sélection du projet : '0 - OUVERTURE'")
 
@@ -205,6 +214,8 @@ class OrdreDeServiceFormulairePage(BasePage):
             # Étape 2 : Remplit le champ
             champ = self.page.get_by_role("textbox", name="Projet (ou Sous-site) *")
             safe_fill(champ, '0', timeout)
+
+            time.sleep(1)
 
             # Étape 3 : Attendre que l'option souhaitée apparaisse
             option = self.page.get_by_role("option", name="0 - OUVERTURE")

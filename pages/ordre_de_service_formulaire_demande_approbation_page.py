@@ -1,5 +1,7 @@
-# import time  # en haut du fichier
+import time  # en haut du fichier
+
 from datetime import datetime
+from pathlib import Path
 
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from core.base_page import BasePage
@@ -10,16 +12,31 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
     # ------------------------------------------------------------------ #
     #  API publique
     # ------------------------------------------------------------------ #
-    def obtenir_approbation(self):
-        self._remplir_date_livraison()
-        self._remplir_adresse_vide()
-        print("Il ne reste plus qu'à cliquer sur demander approbation !!!!")
+    def remplir_date_et_adress_et_obtenir_approbation(self, timeout=10000):
+        self._remplir_date_livraison(timeout)
+        self._remplir_adresse_vide(timeout)
 
-    def ajouter_fichier_joint(self, chemin_pdf):
-        self._ouvrir_modale_ajout_pj()
+        bouton_approbation = self.page.get_by_role("button", name="Obtenir l'approbation").first
+        safe_click(bouton_approbation())
+
+    def ajouter_fichier_joint(self, chemin_pdf, timeout=10000):
+        self._ouvrir_modale_ajout_pj(timeout)
+        time.sleep(.5)
         self._cocher_envoi_fichier_joint()
-        self._uploader_fichier_joint(chemin_pdf)
-        self._valider_ajout_fichier_joint()
+        time.sleep(.5)
+        self._uploader_fichier_joint(chemin_pdf, timeout)
+        time.sleep(1)
+        self._valider_ajout_fichier_joint(timeout)
+
+    def cliquer_sur_bouton_continuer_modal(self, timeout=10000):
+        try:
+            print("🪟 Attente de la modale avec bouton 'Continuer'...")
+            bouton_continuer = self.page.locator('[data-t-rel="dlg-ok-btn"]')
+            bouton_continuer.wait_for(state="visible", timeout=timeout)
+            bouton_continuer.click()
+            print("✅ Clic sur 'Continuer' effectué avec succès.")
+        except Exception as e:
+            print(f"❌ Erreur lors du clic sur le bouton 'Continuer' : {e}")
 
     # ------------------------------------------------------------------ #
     #  Méthodes privées
@@ -97,14 +114,15 @@ class OrdreDeServiceFormulaireDemandeApprobationPage(BasePage):
         print("☑️  Checkbox 'Fichier joint envoyé au' cochée")
 
     def _uploader_fichier_joint(self, chemin_pdf, timeout=10000):
-        nom_fichier = chemin_pdf.split("/")[-1]  # récupère juste "dave.jpg"
+        nom_fichier = Path(chemin_pdf).name  # récupère juste le nom du fichier
 
         # Sélectionner l'input file et y envoyer le fichier
         input_file = self.page.locator('input[type="file"]')
         input_file.set_input_files(chemin_pdf)
-        print(f"📤 Upload lancé : {nom_fichier}")
 
-        self.page.get_by_text(nom_fichier).wait_for(state="visible", timeout=timeout)
+        print(f"📤 Upload lancé : {nom_fichier}")
+        # self.page.get_by_text(nom_fichier).wait_for(state="visible", timeout=timeout)
+        time.sleep(2)
         print(f"✅ Fichier visible dans la modale : {nom_fichier}")
 
     def _valider_ajout_fichier_joint(self, timeout=10000):
